@@ -1,68 +1,61 @@
 #include "appcli.h"
-#include "parse_appcli.c"
-
-JSON_Value *root_listings;
-JSON_Value *root_global;
-JSON_Value *root_top;
-char curl_listings[256]={0};
-char curl_global[256]={0};
-char curl_teste[256]={0};
-char timestring[64]={0};
 
 int main( ) {
 
+    JSON_Value *root_listings, *root_top, *root_global, *root_tracker[MAXPROC];
     char buffer[MAXLEN], *args[64];
-    /*char runfile[]={0};
-    char run_curl[]={0};*/
-
+    char curl_listings[256]={0},curl_global[256]={0},curl_tracker[256]={0},curl_top[256]={0};
+    char globaldatafile[] = "globaldata.json", listingsfile[] = "listings.json", topfile[]= "top.json", tracker_file[64]={0};
+    char timestring[64]={0};
     char cleanup_command[256];
-    char listingsfile[] = "data.json";
-    char globaldatafile[] = "globaldata.json";
     int cts=0, stc=0, len = 0, numargs=0;
 
-    /* it ain't pretty, but it's not a libcurl tutorial /
-     void json_set_allocation_functions( );
+    setlocale(LC_NUMERIC, "");
+
+    fprintf(stdout,
+        "\n                	                            >> PROJECT %sS%s.%sC%s.%sA%s.%sL%s.%sP%s. << \n",
+            SCALP,RESET,SCALP,RESET,SCALP,RESET,SCALP,RESET,SCALP,RESET);
+
+    /* it ain't pretty, but it's not a libcurl tutorial /*/
+    //void json_set_allocation_functions( );
     sprintf(curl_listings,
-            "curl -s https://api.coinmarketcap.com/v2/listings/  > %s", listingsfile);
+        "curl -s \"https://api.coinmarketcap.com/v2/listings/\" > %s", listingsfile);
     sprintf(curl_global,
-            "curl -s https://api.coinmarketcap.com/v2/global/  > %s", globaldatafile);
-    sprintf(cleanup_command,
-             "rm -f %s", listingsfile);*/
-    //system(curl_listings);
+        "curl -s \"https://api.coinmarketcap.com/v2/global/\" > %s", globaldatafile);
+    sprintf(curl_top,
+        "curl -s \"https://api.coinmarketcap.com/v2/ticker/?structure=array/\" > %s", topfile);
+    /*sprintf(testfile,
+        "%d-%d-%d-%d-%d",
+            rand()%10,
+             rand()%100,
+              rand()%1000,
+               rand()%10000,
+                rand()%100000);
+
+    sprintf(curl_tracker,
+        "curl -s https://api.coinmarketcap.com/v2/ticker/?structure=array  > %s",
+            testfile);*/
+    //sprintf(cleanup_command,
+    //"rm -f %s", listingsfile);
+    
 
     //time = ctime( &t );
     strtime(timestring);
-    fprintf(stdout,
-        "\n                	                            >> PROJECT %sS%s.%sC%s.%sA%s.%sL%s.%sP%s. << (dev-build 0.0a)\n",
-            SCALP,RESET,SCALP,RESET,SCALP,RESET,SCALP,RESET,SCALP,RESET);
-    fprintf(stdout,"%s{%s ~ c-bot}%s> Logging Server is online.\n",
-    CYAN,
-    timestring, RESET);
-
     
-    /* parsing json and validating output */
-    /* root das listagens 
-    root_listings = json_parse_file(listingsfile);
-    if ( json_value_get_type(root_listings) != JSONObject  || root_listings ==NULL) {
-        printf("root_listings:\n");
-        system(cleanup_command);
-        return 0;
-    }*/
-    /* root do global info 
-    root_global = json_parse_file(globaldatafile);
+    fprintf(stdout,"%s{%s ~ c-bot}%s> Logging Server is online.\n", CYAN, timestring, RESET);
 
-    if ( json_value_get_type(root_global) == JSONError ) {
-        printf("root_global: \n");
-        system(cleanup_command);
-        return 0;
-    }*/
-
+    if( (mkdir("data", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) && (EEXIST != errno) ){
+        fprintf(stderr, "%s{%s ~ c-bot}%s> Error assembling local file structure.\n",
+            CYAN, timestring, RESET );
+             return 0;
+    }else {
+        fprintf(stderr, "%s{%s ~ c-bot}%s> Successfully assembled local file structure.\n",
+            CYAN, timestring, RESET );
+    }
+    
     strtime(timestring);
     fprintf(stdout,"%s{%s ~ c-bot}%s> API is online @ %s.\n",
-        CYAN,
-         timestring,  
-          RESET, 
-           "api.coinmarketcap.com");
+        CYAN, timestring, RESET, "api.coinmarketcap.com");
     
     strtime(timestring);
     fprintf(stdout,"%s{%s ~ c-bot}%s> Bot is ready, waiting for a command. Type 'help' for commands.\n",CYAN,timestring, RESET);
@@ -82,35 +75,111 @@ int main( ) {
 
         numargs = parse_appcli(buffer, args);
 
-        if ( !cmd(numargs, args) ){
-            strtime(timestring);
-            fprintf(stdout,"%s{%s ~ c-bot}%s> That is not an available command. Type 'help' for a list of available commands.\n",CYAN,timestring, RESET);
-            fprintf(stdout,"%s{%s ~ c-bot}%s> ",CYAN,timestring, RESET);
-        }
+        if (strcmp(args[0], "help") == 0 ){
+            fprintf(stdout, "\nHow to use %sc-bot%s\n\n",GREEN_BOLD,RESET);
+            fprintf(stdout, "%strack {ID}              %s\n",CYAN,RESET);
+            fprintf(stdout, "Adds cryptocurrency with specified ID to bot's tracklist.\n\n"RESET);
+            fprintf(stdout, "%stop 			           %s\n",CYAN,RESET);
+            fprintf(stdout, "Displays Top 100 cryptocurrencies based on Market Capitalization.\n\n");
+            fprintf(stdout, "%sinfo	{ID}			   %s\n",CYAN,RESET);
+            fprintf(stdout, "Displays Top 100 cryptocurrencies based on Market Capitalization.\n\n");
+            fprintf(stdout, "%slistings			   %s\n",CYAN,RESET);
+            fprintf(stdout, "Displays all cryptocurrency listings available on Coin Market Cap.\n\n");
+            fprintf(stdout, "%sglobal data			   %s\n",CYAN,RESET);
+            fprintf(stdout, "Displays global data from cryptocurrency ecosystem.\n\n");
+         
+        }else if ((strcmp(args[0], "track") == 0) ){
 
+            sprintf(tracker_file,
+                "/data/%s",
+                    args[1]);
 
+            chdir(args[1]);
 
-    
-    /* root do top100
-    root_top = json_parse_file(testfile);
-            if ( root_top ==NULL) {
+            sprintf(tracker_file,
+                "%s-%d-%d-%d-%d-%d.json",
+                    timestring,
+                        rand()%10,
+                        rand()%100,
+                        rand()%1000,
+                        rand()%10000,
+                            rand()%100000);
+
+            sprintf(curl_tracker,
+                "curl -s \"https://api.coinmarketcap.com/v2/ticker/%d/\" > %s",
+                    atoi(args[1]),
+                        tracker_file);
+
+            system(curl_tracker);
+            root_tracker[0] = json_parse_file(tracker_file);
+
+            if ( json_value_get_type(root_tracker[0]) != JSONObject  || root_tracker[0] == NULL) {
+                printf("root_tracker:\n");
+                system(cleanup_command);
+                return 0;
+            }else{
+                printf("added to tracklist:\n");
+                //printCoins(root_tracker[0]);
+            }
+
+            system("cd .."); 
+            system("cd ..");           
+             
+        }else if ((strcmp(args[0], "top") == 0) ){
+            system(curl_top);
+            root_top = json_parse_file(topfile);
+
+            if ( root_top == NULL) {
                     printf("root_top:  \n");
                     //system(cleanup_command);
                 return 0;
+            }else{
+                printTopMC( root_top );		
             }
-    */        
+
+        }else if ((strcmp(args[0], "info") == 0) ){
+            //printInfoID(  , atoi(args[1]));
+            
+        }else if ((strcmp(args[0], "listings") == 0) ){
+            system(curl_listings);
+            root_listings = json_parse_file(listingsfile);
+
+            if ( json_value_get_type(root_listings) != JSONObject  || root_listings == NULL) {
+                printf("root_listings:\n");
+                system(cleanup_command);
+                return 0;
+            }else{
+                printCoins(root_listings);
+            }
+
+        }else if ((strcmp(args[0], "global") == 0 ) && ( strcmp(args[1], "data") == 0) ){
+
+            system(curl_global);
+            root_global = json_parse_file(globaldatafile);
+
+            if ( json_value_get_type(root_global) == JSONError ) {
+                printf("root_global: \n");
+                system(cleanup_command);
+                return 0;
+            }else {
+                printGlobalData(root_global);
+            }
+
+        }else{
+            strtime(timestring);
+            fprintf(stdout,"%s{%s ~ c-bot}%s> That is not an available command. Type 'help' for a list of available commands.\n",CYAN,timestring, RESET);
+        }
+       
     strtime(timestring);
-    fprintf(stdout,"%s{%s ~ c-bot}%s> Ready.\n",CYAN,timestring, RESET);
+    //fprintf(stdout,"%s{%s ~ c-bot}%s> Ready.\n",CYAN,timestring, RESET);
     fprintf(stdout,"%s{%s ~ c-bot}%s> ",CYAN,timestring, RESET);
     
     //printTopMC(root_top);
     //printGlobalData(root_global);
     //printCoins(root_listings);
-
-    sleep(30);
-    strtime(timestring);
-    fprintf(stdout,"%s{%s ~ c-bot}%s> Bot is ready, waiting for a command. Type 'help' for commands.\n",CYAN,timestring, RESET);
-    fprintf(stdout,"%s{%s ~ c-bot}%s>",CYAN,timestring, RESET);
+    //strtime(timestring);
+    //fprintf(stdout,"\n%s{%s ~ c-bot}%s> Bot is ready, waiting for a command. Type 'help' for commands.\n",CYAN,timestring, RESET);
+    //fprintf(stdout,"%s{%s ~ c-bot}%s> ",CYAN,timestring, RESET);
 
     }
 
@@ -119,7 +188,7 @@ int main( ) {
     json_value_free(root_listings);
     json_value_free(root_global);
       cleanup code */
-    free(curl_teste);
+    free(curl_tracker);
     
     system(cleanup_command);
     return 0;
@@ -130,19 +199,9 @@ int spawnTracker(char *curl_link){
     int pid = -1;
 
     /*
-        sprintf(testfile,
-        "%d-%d-%d-%d-%d",
-            rand()%10,
-             rand()%100,
-              rand()%1000,
-               rand()%10000,
-                rand()%100000);
+        
 
-        sprintf(curl_teste,
-        "curl -s https://api.coinmarketcap.com/v2/ticker/?structure=array  > %s",
-            testfile);
-
-        system(curl_teste);
+        system(curl_tracker);
     
     
      */
@@ -150,7 +209,9 @@ int spawnTracker(char *curl_link){
     if( ( pid=fork()) == 0 ){
 
 
-    }else return pid;
+    }
+    
+    return pid;
 
 }
 
@@ -247,7 +308,7 @@ void printTopMC(JSON_Value *root){
 
     JSON_Object *json_o_global, *coin, *coin2;
     JSON_Array *data;
-    int i = 0,j=0;;
+    int i = 0;
 
     json_o_global = json_value_get_object(root);
     if(json_o_global ==NULL){
@@ -260,40 +321,45 @@ void printTopMC(JSON_Value *root){
         printf("printTopMC: data:\n");
         return;
     }
+
     fprintf(stdout, 
         "%s%-10s  %-10s          %-10s           %-10s   %-10s | %s%-10s  %-10s            %-10s        %-10s     %-10s         %s  \n",
          RED_BOLD,
           "RANK",
            "COIN",
-            "CIRC. SUPPLY",
+            "MARKET CAP ($)",
              "CHANGE 24H (%)",
               "ASK ($)", 
                RED_BOLD,
                 "RANK",
                  "COIN",
-                  "CIRC. SUPPLY",
+                  "MARKET CAP ($)",
                    "CHANGE 24H (%)",
                     "ASK ($)",RESET);
     for (i = 0; i < 50; i++){
         coin = json_array_get_object(data, i);
         coin2 = json_array_get_object(data, (i+50));
         fprintf(stdout, 
-            "%-5.lf %-15.15s (%s$%-5s%s)   %-25.lf %-5.2lf%%       $%-10.1lf| %-5.lf %-15.15s (%s$%-5s%s)   %-25.lf %-5.2lf%%       $%-10.1lf \n",
+            "%-5.lf %-15.15s (%s$%-5s%s)   %'-25.lf  %-5.2lf%%       $%'-10.1lf| %-5.lf %-15.15s (%s$%-5s%s)   %'-25.lf  %-5.2lf%%       $%'-10.1lf \n",
              json_object_get_number(coin, "rank"),
               json_object_get_string(coin, "name"),
                YELLOW,json_object_get_string(coin,"symbol"),RESET,
-                json_object_get_number(coin,"circulating_supply"),
+                json_object_dotget_number(coin,"quotes.USD.market_cap"),
                  json_object_dotget_number(coin,"quotes.USD.percent_change_24h") ,
                   json_object_dotget_number(coin,"quotes.USD.price"),
                    json_object_get_number(coin2, "rank"),
                     json_object_get_string(coin2, "name"),
                      YELLOW,json_object_get_string(coin2,"symbol"),RESET,
-                      json_object_get_number(coin2,"circulating_supply"),
+                      json_object_dotget_number(coin2,"quotes.USD.market_cap"),
                        json_object_dotget_number(coin2,"quotes.USD.percent_change_24h") ,
                         json_object_dotget_number(coin2,"quotes.USD.price")
                     );
     }
 
+}
+
+void printInfoID(JSON_Value *root, int id){
+    printf("soon\n");
 }
 
 void strtime(char *buffer){
@@ -306,4 +372,9 @@ void strtime(char *buffer){
 
     sprintf(buffer, "%d-%d-%d_(%d:%d:%d)",timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
+}
+
+int cmd (int numargs, char **args){
+    
+    return 0;
 }

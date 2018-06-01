@@ -27,6 +27,7 @@
 #include <netinet/ip.h>
 #include <netdb.h>
 #include <time.h>
+#include <locale.h>
 #include "parson.h"
 
 /* Path Macros */
@@ -36,17 +37,20 @@
 #define CMCTICKER "https://www.api.coinmarketcap.com/v2/ticker/"
 #define CMCLISTINGS "https://www.api.coinmarketcap.com/v2/listings/"
 
-/* Function Macros */
+/* Function Macros 
 #define ASSERT(x) { \
   if(!(x)) { \
     fprintf(stderr, "Assertion: %s: function %s, line %d\n", (char*)(__FILE__), (char*)(__func__), (int)__LINE__); \
     raise(SIGTRAP); \
   } \
-}
+}*/
 
 /* Constant Macros */
+#define MAXPROC 50
 #define MAXLEN 1024
 #define TIME_INTERVAL 5
+
+/* Text Formatting */
 #define YELLOW             "\x1b[33m"
 #define BLUE               "\x1b[34m"
 #define MAGENTA            "\x1b[35m"
@@ -60,24 +64,25 @@
 #define STYLE_BOLD         "\033[1m"
 #define STYLE_NO_BOLD      "\033[22m"
 #define STYLE_UNDERLINE    "\033[4m"
-#define STYLE_NO_UNDERLINE "\033[24m"
-#define CIPHERS  "HIGH:!aNULL:!kRSA:!PSK:!SRP:!MD5:!RC4" 
+#define STYLE_NO_UNDERLINE "\033[24m" 
 
 /* Data Structures 
 
   See /parson.h for info on parson's structures for JSON
 
   */
- 
- 
 
 /*  Function Definitions */
 int main();
 int parse_appcli(char *buf, char **args);
-int cmd(int numargs, char **args);
+int cmd(int numargs, char **args );
 int socket_connect( );
+void strtime(char *buffer);
 void printGlobalData(JSON_Value *root);
 void printCoins(JSON_Value *root);
-int spawnTracker(char *curl_link);
+void printInfoID(JSON_Value *root, int id);
 void printTopMC(JSON_Value *root);
-void strtime(char *buffer);
+int spawnTracker(char *curl_link);
+
+
+/* Global Variables */

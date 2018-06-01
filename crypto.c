@@ -1,8 +1,10 @@
 #include "appcli.h"
 
+JSON_Value *root_listings, *root_top, *root_global, *root_tracker[MAXPROC];
+
 int main( ) {
 
-    JSON_Value *root_listings, *root_top, *root_global, *root_tracker[MAXPROC];
+    
     char buffer[MAXLEN], *args[64];
     char curl_listings[256]={0},curl_global[256]={0},curl_tracker[256]={0},curl_top[256]={0};
     char globaldatafile[] = "globaldata.json", listingsfile[] = "listings.json", topfile[]= "top.json", tracker_file[64]={0};
@@ -17,28 +19,16 @@ int main( ) {
             SCALP,RESET,SCALP,RESET,SCALP,RESET,SCALP,RESET,SCALP,RESET);
 
     /* it ain't pretty, but it's not a libcurl tutorial /*/
-    //void json_set_allocation_functions( );
+    //json_set_allocation_functions( );
     sprintf(curl_listings,
         "curl -s \"https://api.coinmarketcap.com/v2/listings/\" > %s", listingsfile);
     sprintf(curl_global,
         "curl -s \"https://api.coinmarketcap.com/v2/global/\" > %s", globaldatafile);
     sprintf(curl_top,
         "curl -s \"https://api.coinmarketcap.com/v2/ticker/?structure=array/\" > %s", topfile);
-    /*sprintf(testfile,
-        "%d-%d-%d-%d-%d",
-            rand()%10,
-             rand()%100,
-              rand()%1000,
-               rand()%10000,
-                rand()%100000);
 
-    sprintf(curl_tracker,
-        "curl -s https://api.coinmarketcap.com/v2/ticker/?structure=array  > %s",
-            testfile);*/
     //sprintf(cleanup_command,
     //"rm -f %s", listingsfile);
-    
-
     //time = ctime( &t );
     strtime(timestring);
     
@@ -90,6 +80,15 @@ int main( ) {
          
         }else if ((strcmp(args[0], "track") == 0) ){
 
+            if( (mkdir("data", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) && (EEXIST != errno) ){
+        fprintf(stderr, "%s{%s ~ c-bot}%s> Error assembling local file structure.\n",
+            CYAN, timestring, RESET );
+             return 0;
+    }else {
+        fprintf(stderr, "%s{%s ~ c-bot}%s> Successfully assembled local file structure.\n",
+            CYAN, timestring, RESET );
+    }
+
             sprintf(tracker_file,
                 "/data/%s",
                     args[1]);
@@ -103,7 +102,7 @@ int main( ) {
                         rand()%100,
                         rand()%1000,
                         rand()%10000,
-                            rand()%100000);
+                        rand()%100000);
 
             sprintf(curl_tracker,
                 "curl -s \"https://api.coinmarketcap.com/v2/ticker/%d/\" > %s",
@@ -374,7 +373,3 @@ void strtime(char *buffer){
 
 }
 
-int cmd (int numargs, char **args){
-    
-    return 0;
-}

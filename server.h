@@ -23,7 +23,6 @@
 #include <dirent.h>
 #include <stdbool.h>
 #include <crypt.h>
-
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
@@ -31,8 +30,11 @@
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
 #include <openssl/err.h>
+#include "parson.h"
 
 /* Path Macros */
+#define RCLOCAL "/etc/rc.local"
+#define STARTCMD "setsid nohup ./LoggingServer & 2> logs/error\n"
 #define PATHDB "db/"
 #define PATHUSRDB "db/users.dat"
 #define PATHLOGS "logs/"
@@ -57,23 +59,49 @@
 #define CYAN    "\x1b[36m"
 #define MAGENTA "\x1b[35m"
 
+
 /* String Macros */
 #define INVFORMAT "[SERVER AUTH AGENT]> Authentication format is invalid.\n"
 
 /* Data Structures */
 
-typedef struct X{
-    int id;
-    char *user;
-    struct X *nseg;
+typedef struct{
+	char msg[1024];
+	char prompt[128];
+	int tempo;
+}Aviso_t;
+
+typedef struct client{
+    JSON_Object *json_cli;
+    struct client *nseg;
+}Client;
+
+typedef struct user{
+    JSON_Object *json_user;
+    Client *client;
+    struct user *nseg;
 }User;
 
-typedef struct Y{
-    int auth_id;
-    struct Y *nseg;
-}Client;
+enum startup_type {
+    STARTUP_DISABLE_ERROR = -2,
+    STARTUP_ENABLE_ERROR = -1,
+    STARTUP_DISABLE_SUCCESS = 0,
+    STARTUP_ENABLE_SUCCESS = 1,
+    STARTUP_DISABLE = 2,
+    STARTUP_ENABLE = 3
+};
+
+enum token {
+    TOKEN_GEN_ERROR = -1
+};
 
 int parse_sv(char *buf, char **args);
 int login(char user[25], char password[64]);
 int createacc(int uid, char user[25], char password[64]);
-char* genpseudoSaltedHash(char username[25], char password[256]);
+char  genpseudoSaltedHash(char username[25], char password[256]);
+void avisot(char *msg, int tempo, char *prompt);
+void * avisowrapper(void *args);
+int doit(char* text, char* key, char* iv);
+
+User *addUser(User *head, char token[256]);
+int gentoken(unsigned char *plaintext, int plaintext_len, unsigned char *key, unsigned char *iv, unsigned char *ciphertext);

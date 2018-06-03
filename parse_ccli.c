@@ -20,35 +20,26 @@ int parse_ccli(char *buf, char **args){
     return counter;
 }
 
-int cmd (int numargs, char **args, int auth){
-
-    if( 0 == auth){
-        if (strcmp(args[0], "help") == 0 ){
-            fprintf(stdout,"%s[CONSOLE COMMANDS]%s> Current Console/Client is not authenticated.\n", RED, RESET);
-		    fprintf(stdout,"%s[CONSOLE COMMANDS]%s> login [USER] [PASSWORD]\n", MAGENTA, RESET);
-            //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
-		    return 1;
-	    }
-        if (strcmp(args[0], "login") == 0 ){
-            if(strcmp(args[1], "-t") == 0){
-                fprintf(stdout,"%s[CONSOLE COMMANDS]%s> Trying to authenticate user %s for a timed session.\n", CYAN, RESET, args[2]);
-                //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
-                return 1;
-            }
-		    fprintf(stdout,"%s[CONSOLE COMMANDS]%s> Trying to authenticate user %s.\n", CYAN, RESET, args[1]);
-            //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
-		    return 1;
-	    }
-
-
-    }else if ( 1 == auth){
-            if (strcmp(args[0], "help") == 0 ){
-		    fprintf(stdout,"%s[CONSOLE COMMANDS]%s> login [USER] [PASSWORD]\n", MAGENTA, RESET);
-            //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
-		    return 1;
-	    }
-
+int cmd (int numargs, char **args){
+ 
+    if (strcmp(args[0], "help") == 0 ){
+        fprintf(stdout,"%s[CONSOLE COMMANDS]%s> Current Console/Client is not authenticated.\n", RED, RESET);
+        fprintf(stdout,"%s[CONSOLE COMMANDS]%s> login [USER] [PASSWORD]\n", MAGENTA, RESET);
+        //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
+        return 1;
     }
+    if (strcmp(args[0], "login") == 0 ){
+        if(strcmp(args[1], "-t") == 0){
+            fprintf(stdout,"%s[CONSOLE COMMANDS]%s> Trying to authenticate user %s for a timed session.\n", CYAN, RESET, args[2]);
+            //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
+            return 1;
+        }
+        fprintf(stdout,"%s[CONSOLE COMMANDS]%s> Trying to authenticate user %s.\n", CYAN, RESET, args[1]);
+        //fprintf(stdout,"%s[CONSOLE COMMANDS]%s> \n", MAGENTA, RESET);
+        return 1;
+    }
+
+
 
     return 0;
 }

@@ -34,8 +34,8 @@
 #define FIFOWRITE "/tmp/LoggingAgent"
 #define FIFOREAD  "/tmp/LoggingResponseTeam"
 #define FIFOAUTH "/tmp/LoggingAuthProtocol"
-#define CMCTICKER "https://www.api.coinmarketcap.com/v2/ticker/"
-#define CMCLISTINGS "https://www.api.coinmarketcap.com/v2/listings/"
+#define FIFOAUTHRT "/tmp/LoggingAuthRT"
+#define CMCTICKER "https://api.coinmarketcap.com/v2/ticker/"
 
 /* Function Macros 
 #define ASSERT(x) { \
@@ -71,18 +71,41 @@
   See /parson.h for info on parson's structures for JSON
 
   */
+typedef struct auth_t{
+  int tempo;
+  char token[256];
+}timed_auth_t;
+
+typedef struct cleaner_t{
+  int id;
+  char filename[256];
+}cleaner_t;
+
+enum auth_mode {   
+  REGISTRATION_FAILED = -3,
+  AUTH_FAILED = -2,
+  AUTH_ERROR   = -1,
+  AUTH_SUCCESS = 0,
+  USRPWD = 1,
+  AUTH_TOKEN = 2,
+  REGISTRATION_SUCCESS = 3
+};
 
 /*  Function Definitions */
-int main();
+
+int main(int argc, char **argv);
+void cbot(int pid, char authtoken[256], int timed);
 int parse_appcli(char *buf, char **args);
-int cmd(int numargs, char **args );
-int socket_connect( );
 void strtime(char *buffer);
 void printGlobalData(JSON_Value *root);
 void printCoins(JSON_Value *root);
 void printInfoID(JSON_Value *root, int id);
 void printTopMC(JSON_Value *root);
-int spawnTracker(char *curl_link);
-
+int spawnTracker( int id);
+int getAuthenticated( int auth_mode, char username[25], char password[256], char authtoken[256]);
+void timedauth_t( int tempo );
+void * timedauthwrapper(void *args);
+void cleanerthread_t ( char *nome, int id );
+void * cleanerwrapper(void *args);
 
 /* Global Variables */

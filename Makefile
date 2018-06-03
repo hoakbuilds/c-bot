@@ -1,6 +1,6 @@
 CC=cc
 FLAGS=-c -Wall
-LIBS=-lm -L. libparson.so
+LIBS=-lm -lpthread -lcrypto -lssl -L. libparson.so
 OBS= server.o parse_sv.o usracc_sys.o ccli.o parse_appcli.o ccli.o crypto.o btccli.o
 OBSSERVER= server.o parse_sv.o usracc_sys.o 
 OBSCCLI= ccli.o parse_ccli.o
